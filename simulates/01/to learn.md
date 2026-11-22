@@ -12,6 +12,9 @@
   - storage lens
   - what else? What other services are processing stuff from s3?
 
+- IAM permissions
+  - What is ARN?
+
 ## Amazon Macie
 
 - Fully managed data security and data privacy service that uses ML and pattern matching to automatically discover, classify and protect sensitive data stored in S3
@@ -33,3 +36,35 @@
 ## Important S3 services
 
 - See 00. intro/19. S3 services.md
+
+## IAM permissions
+
+- To delegate IAM role creation to devs without letting them scalate their own privileges, it's necessary to combine:
+  - IAM permission boundaries
+  - strict condition at role creation time
+
+- IAM permission boundary
+  - maximum ceiling of permissions an IAM role can have
+  - doesn't grant permissions, it's only a cap
+
+- Step 1: define the ceiling
+  - platform team defines the ceiling, maximum approved permissions
+
+- Step 2: enforce the ceiling preventively
+  - simply creating the boundary do nothing unless devs are forced to attach it
+  - without the attached boundary, they can't create the role
+  - you can also prevent the role from being deleted after
+
+### ARN [Amazon Resource Name]
+
+- Unique, globally uniform identifier AWS assigns to every resource in your account
+- IAM policy ARN looks like this:
+
+```
+arn:aws:iam::<number>:policy/PlatformApprovedLambdaBoundary
+```
+
+- arn:aws:iam:: -> identifies the AWS IAM service
+  - global, so the region field between the colons is blank
+- <number>: -> 12-digit AWS account ID
+- policy/PlatformApprovedBoundary: resource type `policy` and the exact name of the managed policy created by the platform team

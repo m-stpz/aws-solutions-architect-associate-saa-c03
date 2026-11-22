@@ -128,7 +128,37 @@
   - Kinesis data firehose: delivers streaming data, it doesn't catalog datasets on run Spark ETL jobs
   - EMR on EC2: EMR can run Spark, but managing clusters adds operational overhead that the requirement explicitly excludes
 
->
+> AWS Glue crawlers and ETL jobs for serverless data cataloging and spark-based transformations
+
+53. A platform team wants application teams to create IAM roles for their AWS Lambda functions. The application teams must be able to create roles and attach policies, but they must never be able to grant a role more permissions than the platform team's approved maximum. Which TWO steps should the solutions architect take? (Choose two.)
+
+- My answer:
+  - wrong: Use IAM Access Analyzer to review roles after they are created and delete any role that exceeds the approved permissions.
+    - detective and reactive. A role could be used before review, and access could already have been scalated
+  - correct: Create an IAM permissions boundary policy that defines the maximum allowed permissions, and require every application-created role to include that boundary.
+    - permission boundary sets the max permissinos that identity-based policies can grant a role, even if the role policy allows more
+
+- Correct:
+  - Grant application teams iam:CreateRole and iam:PutRolePermissionsBoundary, and add a condition that requires the permissions boundary ARN to match the approved policy.
+    - enforcing the boundary at role creation and update time prevents teams from creating/modifying roles without the approved maximum
+
+> Use permission boundaries plus a condition requiring the boundary on role creation to delete IAM admin safely
+
+54. Account A stores objects in an Amazon S3 bucket using server-side encryption with an AWS KMS customer managed key (SSE-KMS) in Account A. An IAM role in Account B needs to download and decrypt those objects. The S3 bucket policy already allows the Account B role to perform s3:GetObject. Which TWO additional permissions are required? (Choose two.)
+
+- My answer:
+  - correct: KMS key policy in account A must allow the acount B role to the key for `kms:Decrypt`
+    - A cross-account KMS key policy must grant the external principal access. s3 bucket policy alone doesn't authorize KMS decryption
+  - wrong: the Account A service control policy must allow `kms:Decrypt` for Account B
+    - SCPs don't grant permissions. They only limit the max permission available within an account
+
+- Correct:
+  - The IAM policy for the Account B role must allow `kms:Decrypt` on the account A key ARN
+    - Cross-account access require both the key policy and the caller's identity policy to allow the action
+
+- Other alternatives:
+
+> For cross-account SSE-KMS access, allow the external principal in both the KMS key policy and the caller's IAM policy; the s3 bucket policy handles only s3 authorization
 
 ---
 
