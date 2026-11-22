@@ -160,14 +160,16 @@
 
 > For cross-account SSE-KMS access, allow the external principal in both the KMS key policy and the caller's IAM policy; the s3 bucket policy handles only s3 authorization
 
----
-
-N.
+62. A company uses AWS Backup to protect Amazon S3 and Amazon RDS resources. Auditors require that backups cannot be deleted or altered during a 7-year retention period, even by administrators with full AWS Backup permissions. Which feature meets this requirement?
 
 - My answer:
+  - AWS Backup vault lock in governance mode
+    - Governance mode can be bypassed by users with sufficient IAM permissinos, so it doesn't meet the admin-can't-delete requirement
 
 - Correct:
+  - AWS backup valut lock in compliance mode
+    - Vault lock in compliance mode enforces write-once, read-many protection that even the account root user can't remove before the retention period ends, subject to the config time
 
 - Other alternatives:
 
->
+> Use AWS backup vault lock in compliance mode for immutable, admin-proof backups across AWS backup-supported resources

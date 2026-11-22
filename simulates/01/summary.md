@@ -9,8 +9,8 @@ Then open http://127.0.0.1:8787/. Opening the HTML directly still works, but dow
 
 # todo
 
-- [ ] do test 1
-- [ ] review result test 1 + take notes
+- [x] do test 1
+- [x] review result test 1 + take notes
 - [ ] study weakest areas
 - [ ] do test 2
 - [ ] review result test 1 + take notes

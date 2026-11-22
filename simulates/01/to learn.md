@@ -15,6 +15,8 @@
 - IAM permissions
   - What is ARN?
 
+- cross-account KMS
+
 ## Amazon Macie
 
 - Fully managed data security and data privacy service that uses ML and pattern matching to automatically discover, classify and protect sensitive data stored in S3
@@ -68,3 +70,55 @@ arn:aws:iam::<number>:policy/PlatformApprovedLambdaBoundary
   - global, so the region field between the colons is blank
 - <number>: -> 12-digit AWS account ID
 - policy/PlatformApprovedBoundary: resource type `policy` and the exact name of the managed policy created by the platform team
+
+## Cross-account KMS
+
+- two-key rule: both the account owning the resource and the account calling must explicitly agree
+  - for an s3 object encrypted with a customer-managed KMS key [SSE-KMS], data is protected by two separate resources in account A [s3 object + KMS KEY]
+  - two-layer auth when account B tries to reach it
+
+### same vs. cross-account encryption
+
+- same-account: within a single AWS account, IAM trusts its own resources
+  - an `allow` in either the IAM identity policy or resource policy [like s3 bucket policy or KMS key policy] is enough to grant access, provided there's no explicit `deny`
+
+- cross-account: AWS never allows one account to unilaterally grant itself access to another account's resources, not does it allow external account for force permissions onto a principal you own
+  - thus, access requires explicit `allow` on BOTH SIDES of the account boundary
+  - resource side [account a]: I trust account b to user my resource
+  - identity side [account b]: I permit my account to reach out and use that specific resource in account A
+
+## Cost optimization
+
+- AWS storage lens vs. Trusted advisor
+  - storage lens: organization-wide visibility, dashboard for s3 for all accounts
+  - trusted advisor: runs broader account-level best practices checks, rather than deep s3 usage analytics
+    - iddle EC2 instances, unattached EBS volumes
+
+- Fargate spot vs. on-demand
+  - whenever a a scenario asks to reduce container compute costs for fault-tolerant, interruptible batch jobs without managing ev2 hosts, choose fargate spot [up to 70% off on-demand, with a 2-min interruption notice]
+  - on-demand: for critical, interruption-sensitive workloads
+
+- NAT instance vs. NAT Gateway:
+  - NAT Gateway: default for prod because they're managed and highly available, but they carry fixed hourly price [$32/mo] and per-GB processing fees
+  - if a question explicitly specifies a low-traffic dev/test VPC where high availability isn't required and asks for the lowest cost, a small EC2 NAT instance is the way to go
+
+## Security, IAM and governance
+
+- SCPS never grante permissions [cross-account KMS]
+  - SCPS [service control policies] only define the max permission boundary for an account
+    - never grant permissinos
+  - cross-account decryption of SSE-KMS objects, you always need an explicit `Allow` in both the KMS key policy [account A] and the caller's IAM policy [account B]
+
+- Preventive vs. detective guardrails [permissions boundaries]:
+  - detective: AWS access analyzer, AWS config, and GuardDuty
+    - alert/remediate AFTER an action happens
+  - preventive: IAM permissions boundaries
+    - prevent privelege scalation when delegating role creation
+
+- Compliance mode vs. Governance mode [WORM]:
+  - governance mode: can be bypassed by users with special IAM permissions
+  - compliance mode: no one can delete/shorten retention, not even admins or root users
+
+- Macie vs. Inspector:
+  - Macie: scans S3 with ML/pattern matching to discover and classify PII
+  - Inspector: scans EC2 instances, ECR container images and lambda func for software vulnerabilities
