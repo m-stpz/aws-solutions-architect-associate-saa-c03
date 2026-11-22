@@ -122,3 +122,31 @@ arn:aws:iam::<number>:policy/PlatformApprovedLambdaBoundary
 - Macie vs. Inspector:
   - Macie: scans S3 with ML/pattern matching to discover and classify PII
   - Inspector: scans EC2 instances, ECR container images and lambda func for software vulnerabilities
+
+## Networking and compute placement
+
+- Stateless NACLs vs. Stateful security groups
+  - SG: stateful -> if inbound traffic is allowed, return traffic is alos
+  - Network ACLs [NACLS]: stateless -> every inbound and outbound rule is evaluated independently
+
+- EC2 placement groups
+  - cluster: physically together
+    - packs instance PHYSICALLY together in a single AZ
+    - lowest network latency and highest throughput [ideal for HPC]
+  - partition:
+    - spreads groups of instances across distinct hardware partitions
+    - ideal for large distributed workloads like Hadoop, cassandra, or kafka
+  - spread:
+    - places individual instances on completely separate racks [max 7 per AZ]
+    - small, critical workloads that must avoid correlated hardware failures
+
+## Dbs and serverless analytics
+
+- AWS glue vs. Athena
+  - AWS glue: data cataloging [crawlers] and serverless Spark/Python ETL transformations
+  - Athena: ad-hoc serverlesss SQL qeuries directly against s3 data
+
+- Aurora global db vs. RDS cross-region read replicas
+  - RDS cross-region replicas: use async replication
+    - lag seconds or minutes
+  - Aurora global db: cross-region RPO of less than 1s + fast local reads in secondary regions
